@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Cat Functions</title>
+    <style>
+        body {
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            margin-bottom: 24px;
+        }
+        canvas {
+            border: 2px solid #888;
+            background: #fff;
+            margin-bottom: 16px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: #8ec5fc;
+            color: #222;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #6a93cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Animated Cat Functions</h1>
+    <canvas id="catCanvas" width="240" height="220"></canvas>
+    <div class="controls">
+        <button onclick="setAnimation('tail')">Tail Swish</button>
+        <button onclick="setAnimation('paw')">Paw Wave</button>
+        <button onclick="setAnimation('walk')">Walk</button>
+        <button onclick="setAnimation('chase')">Chase Butterfly</button>
+        <button onclick="setAnimation('sleep')">Sleep</button>
+        <button onclick="setAnimation('jump')">Jump</button>
+        <button onclick="setAnimation('yarn')">Play with Yarn</button>
+        <button onclick="setAnimation('blink')">Blink/Ear Twitch</button>
+        <button onclick="setAnimation('meow')">Meow</button>
+    </div>
+    <script>
+        const canvas = document.getElementById('catCanvas');
+        const ctx = canvas.getContext('2d');
+        let frame = 0;
+        let animation = 'idle';
+        let walkX = 40;
+        let tailAngle = 0;
+        let pawAngle = 0;
+        let earWiggle = 0;
+        let blink = false;
+        let sleepZ = 0;
+        let jumpY = 0;
+        let yarnX = 180;
+        let butterflyY = 60;
+        let meowOpen = false;
+        function setAnimation(type) {
+            animation = type;
+            // Reset variables for each animation
+            walkX = 40;
+            tailAngle = 0;
+            pawAngle = 0;
+            earWiggle = 0;
+            blink = false;
+            sleepZ = 0;
+            jumpY = 0;
+            yarnX = 180;
+            butterflyY = 60;
+            meowOpen = false;
+        }
+        function drawCat() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Smoother up-down for walk/chase
+            let walkBounce = 0;
+            if (animation === 'walk' || animation === 'chase') {
+                walkBounce = Math.sin(frame * 0.25) * 4;
+            }
+            // Body (centered and proportionate)
+            ctx.beginPath();
+            ctx.ellipse(walkX+100, 150-jumpY+walkBounce, 32, 38, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#f5d6b4';
+            ctx.fill();
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+            // Head (centered above body)
+            ctx.beginPath();
+            ctx.arc(walkX+100, 100-jumpY+walkBounce, 24, 0, Math.PI * 2);
+            ctx.fillStyle = '#f5d6b4';
+            ctx.fill();
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+            // Left ear
+            ctx.save();
+            ctx.translate(walkX+86, 76-jumpY+walkBounce);
+            ctx.rotate(-earWiggle * 0.15 + Math.sin(frame*0.18)*0.08);
+            ctx.beginPath();
+            ctx.moveTo(-8, 12);
+            ctx.lineTo(0, -16);
+            ctx.lineTo(8, 12);
+            ctx.fillStyle = '#f5d6b4';
+            ctx.fill();
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+            // Right ear
+            ctx.save();
+            ctx.translate(walkX+114, 76-jumpY+walkBounce);
+            ctx.rotate(earWiggle * 0.15 + Math.cos(frame*0.18)*0.08);
+            ctx.beginPath();
+            ctx.moveTo(8, 12);
+            ctx.lineTo(0, -16);
+            ctx.lineTo(-8, 12);
+            ctx.fillStyle = '#f5d6b4';
+            ctx.fill();
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+            // Tail (smoother, more expressive)
+            ctx.save();
+            ctx.translate(walkX+132, 170-jumpY+walkBounce);
+            let tailWiggle = tailAngle + Math.sin(frame*0.13)*0.3;
+            ctx.rotate(tailWiggle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(28, -10, 38, 18);
+            ctx.lineWidth = 12;
+            ctx.strokeStyle = '#f5d6b4';
+            ctx.stroke();
+            ctx.closePath();
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(28, -10, 38, 18);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#222';
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+            // Legs (front left, walk cycle)
+            let frontLegY = 0, backLegY = 0;
+            if (animation === 'walk' || animation === 'chase') {
+                frontLegY = Math.sin(frame*0.25)*5;
+                backLegY = -Math.sin(frame*0.25)*3;
+            }
+            ctx.beginPath();
+            ctx.arc(walkX+88, 185-jumpY+walkBounce+frontLegY, 7, 0, Math.PI * 2);
+            ctx.fillStyle = '#f5d6b4';
+            ctx.fill();
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+            // Legs (front right, animated paw, walk cycle)
+            ctx.save();
+            ctx.translate(walkX+112, 185-jumpY+walkBounce-frontLegY);
+            ctx.rotate(pawAngle + Math.sin(frame*0.25+Math.PI)*0.3);
+            ctx.beginPath();
+            ctx.arc(0, 0, 7, 0, Math.PI * 2);
+            ctx.fillStyle = '#f5d6b4';
+            ctx.fill();
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+            // Legs (back left, walk cycle)
+            ctx.beginPath();
+            ctx.arc(walkX+94, 196-jumpY+walkBounce+backLegY, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#f5d6b4';
+            ctx.fill();
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+            // Legs (back right, walk cycle)
+            ctx.beginPath();
+            ctx.arc(walkX+106, 196-jumpY+walkBounce-backLegY, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#f5d6b4';
+            ctx.fill();
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+            // Eyes
+            ctx.beginPath();
+            if (blink) {
+                ctx.ellipse(walkX+94, 104-jumpY+walkBounce, 5, 2, 0, 0, Math.PI * 2);
+                ctx.ellipse(walkX+106, 104-jumpY+walkBounce, 5, 2, 0, 0, Math.PI * 2);
+            } else {
+                ctx.arc(walkX+94, 104-jumpY+walkBounce, 5, 0, Math.PI * 2);
+                ctx.arc(walkX+106, 104-jumpY+walkBounce, 5, 0, Math.PI * 2);
+            }
+            ctx.fillStyle = '#222';
+            ctx.fill();
+            ctx.closePath();
+            // Nose
+            ctx.beginPath();
+            ctx.arc(walkX+100, 112-jumpY+walkBounce, 3, 0, Math.PI);
+            ctx.fillStyle = '#e57373';
+            ctx.fill();
+            ctx.closePath();
+            // Mouth
+            ctx.beginPath();
+            if (meowOpen) {
+                ctx.arc(walkX+100, 118-jumpY+walkBounce, 5, 0, Math.PI, false);
+            } else {
+                ctx.moveTo(walkX+100, 115-jumpY+walkBounce);
+                ctx.lineTo(walkX+100, 120-jumpY+walkBounce);
+                ctx.moveTo(walkX+100, 120-jumpY+walkBounce);
+                ctx.lineTo(walkX+96, 123-jumpY+walkBounce);
+                ctx.moveTo(walkX+100, 120-jumpY+walkBounce);
+                ctx.lineTo(walkX+104, 123-jumpY+walkBounce);
+            }
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+            // Whiskers
+            ctx.beginPath();
+            ctx.moveTo(walkX+90, 112-jumpY+walkBounce);
+            ctx.lineTo(walkX+80, 110-jumpY+walkBounce);
+            ctx.moveTo(walkX+90, 115-jumpY+walkBounce);
+            ctx.lineTo(walkX+80, 115-jumpY+walkBounce);
+            ctx.moveTo(walkX+90, 118-jumpY+walkBounce);
+            ctx.lineTo(walkX+80, 120-jumpY+walkBounce);
+            ctx.moveTo(walkX+110, 112-jumpY+walkBounce);
+            ctx.lineTo(walkX+120, 110-jumpY+walkBounce);
+            ctx.moveTo(walkX+110, 115-jumpY+walkBounce);
+            ctx.lineTo(walkX+120, 115-jumpY+walkBounce);
+            ctx.moveTo(walkX+110, 118-jumpY+walkBounce);
+            ctx.lineTo(walkX+120, 120-jumpY+walkBounce);
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.closePath();
+            // Sleep Zzz (wiggle)
+            if (animation === 'sleep') {
+                ctx.font = 'bold 32px Arial';
+                ctx.fillStyle = '#6a93cb';
+                ctx.save();
+                ctx.translate(walkX+60+sleepZ, 60-jumpY-sleepZ);
+                ctx.rotate(Math.sin(frame*0.2)*0.2);
+                ctx.fillText('Z', 0, 0);
+                ctx.restore();
+                ctx.save();
+                ctx.translate(walkX+80+sleepZ, 40-jumpY-sleepZ*2);
+                ctx.rotate(Math.cos(frame*0.2)*0.2);
+                ctx.fillText('Z', 0, 0);
+                ctx.restore();
+            }
+            // Yarn (wiggle)
+            if (animation === 'yarn') {
+                ctx.save();
+                ctx.translate(yarnX, 200 + Math.sin(frame*0.3)*2);
+                ctx.rotate(Math.sin(frame*0.2)*0.1);
+                ctx.beginPath();
+                ctx.arc(0, 0, 12, 0, Math.PI * 2);
+                ctx.fillStyle = '#e57373';
+                ctx.fill();
+                ctx.closePath();
+                ctx.restore();
+            }
+            // Butterfly (flap)
+            if (animation === 'chase') {
+                ctx.save();
+                ctx.translate(walkX+40, butterflyY);
+                ctx.rotate(Math.sin(frame*0.2)*0.2);
+                ctx.beginPath();
+                ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                ctx.fillStyle = '#8ec5fc';
+                ctx.fill();
+                ctx.closePath();
+                ctx.beginPath();
+                ctx.arc(-8, -8-Math.sin(frame*0.5)*3, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff176';
+                ctx.fill();
+                ctx.closePath();
+                ctx.beginPath();
+                ctx.arc(8, -8+Math.sin(frame*0.5)*3, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff176';
+                ctx.fill();
+                ctx.closePath();
+                ctx.restore();
+            }
+        }
+        function animate() {
+            frame++;
+            switch(animation) {
+                case 'tail':
+                    tailAngle = Math.sin(frame*0.2)*0.7;
+                    break;
+                case 'paw':
+                    pawAngle = Math.sin(frame*0.3)*0.7;
+                    break;
+                case 'walk':
+                    walkX += 2;
+                    if (walkX > 120) walkX = 40;
+                    break;
+                case 'chase':
+                    walkX += 2;
+                    butterflyY += Math.sin(frame*0.2)*2;
+                    if (walkX > 120) walkX = 40;
+                    break;
+                case 'sleep':
+                    sleepZ = Math.abs(Math.sin(frame*0.1))*20;
+                    blink = true;
+                    break;
+                case 'jump':
+                    jumpY = Math.abs(Math.sin(frame*0.2))*40;
+                    break;
+                case 'yarn':
+                    yarnX -= 2;
+                    if (yarnX < 60) yarnX = 180;
+                    break;
+                case 'blink':
+                    blink = (frame % 30 > 25);
+                    earWiggle = Math.sin(frame * 0.2);
+                    break;
+                case 'meow':
+                    meowOpen = (frame % 20 > 10);
+                    break;
+                default:
+                    // idle
+                    break;
+            }
+            drawCat();
+        }
+        setInterval(animate, 80);
+        drawCat();
+    </script>
+</body>
+</html>
